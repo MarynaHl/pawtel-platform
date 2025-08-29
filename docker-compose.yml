@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:15
+    container_name: pawtel-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: pawtel
+      POSTGRES_USER: pawtel
+      POSTGRES_PASSWORD: pawtel
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
