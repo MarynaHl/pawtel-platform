@@ -8,14 +8,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
-
     @Autowired
-    public AuthController(UserRepository userRepository) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder();
-    }
+    private UserRepository userRepository;
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @PostMapping("/register")
     public String register(@RequestBody RegisterRequest request) {
@@ -23,8 +19,8 @@ public class AuthController {
             return "User already exists!";
         }
 
-        String hashedPassword = passwordEncoder.encode(request.getPassword());
-        User user = new User(request.getEmail(), hashedPassword);
+        String hashed = passwordEncoder.encode(request.getPassword());
+        User user = new User(request.getEmail(), hashed);
         userRepository.save(user);
 
         return "User registered successfully!";
