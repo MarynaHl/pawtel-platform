@@ -7,8 +7,7 @@ services:
       POSTGRES_DB: pawtel
       POSTGRES_USER: pawtel
       POSTGRES_PASSWORD: pawtel
-    ports:
-      - "5432:5432"
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U pawtel -d pawtel"]
       interval: 5s
