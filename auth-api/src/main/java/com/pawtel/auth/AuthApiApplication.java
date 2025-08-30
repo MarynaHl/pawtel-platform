@@ -11,3 +11,10 @@ public class AuthApiApplication {
 	}
 
 }
+
+
+@Bean
+org.springframework.web.client.RestTemplate restTemplate() {
+	return new org.springframework.web.client.RestTemplate();
+}
+
