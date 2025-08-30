@@ -5,6 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import com.pawtel.auth.security.JwtUtil;
+
+
 import java.util.Map;
 
 @RestController
@@ -57,10 +60,11 @@ public class AuthController {
         }
 
         User user = userOpt.get();
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", "Invalid credentials"));
         }
+
 
         String token = jwtUtil.generateToken(user.getEmail());
         return ResponseEntity.ok(Map.of("token", token));
