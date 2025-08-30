@@ -20,12 +20,10 @@ public class TransformController {
             @RequestHeader(value = "X-Internal-Token", required = false) String token,
             @RequestBody TransformRequest req
     ) {
-
         if (token == null || !token.equals(internalToken)) {
+
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-
-
         String out = new StringBuilder(req.text()).reverse().toString().toUpperCase();
         return ResponseEntity.ok(new TransformResponse(out));
     }
