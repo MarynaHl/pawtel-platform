@@ -7,6 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.JwtException;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -16,12 +17,15 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
+    private final Key key;
+    private final long expirationMillis = 1000L * 60 * 60; // 1 год
 
-    private final String secret = "change-me-change-me-change-me-change-me";
-    private final long expirationMillis = 1000L * 60 * 60; // 1 година
+    public JwtUtil(@Value("${jwt.secret:change-me-change-me-change-me-change}") String secret) {
 
-    private Key key() {
-        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        if (secret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalArgumentException("jwt.secret must be at least 32 bytes for HS256");
+        }
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     public String generateToken(String email) {
@@ -30,15 +34,13 @@ public class JwtUtil {
                 .setSubject(email)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + expirationMillis))
-                .signWith(key(), SignatureAlgorithm.HS256)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
-
 
     public String extractEmail(String token) {
         return parse(token).getBody().getSubject();
     }
-
 
     public boolean validateToken(String token) {
         try {
@@ -51,7 +53,7 @@ public class JwtUtil {
 
     private Jws<Claims> parse(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(key())
+                .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token);
     }

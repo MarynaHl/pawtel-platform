@@ -9,24 +9,13 @@ services:
       POSTGRES_PASSWORD: pawtel
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pawtel -d pawtel"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  auth-api:
-    build: ./auth-api
-    container_name: pawtel-auth
-    environment:
-      POSTGRES_URL: jdbc:postgresql://postgres:5432/pawtel
-      POSTGRES_USER: pawtel
-      POSTGRES_PASSWORD: pawtel
-      JWT_SECRET: mysecretkey
-      INTERNAL_TOKEN: topsecret
-      DATA_API_URL: http://data-api:8081
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-      - data-api
 
   data-api:
     build: ./data-api
@@ -35,6 +24,24 @@ services:
       INTERNAL_TOKEN: topsecret
     ports:
       - "8081:8081"
+
+  auth-api:
+    build: ./auth-api
+    container_name: pawtel-auth
+    environment:
+      POSTGRES_URL: jdbc:postgresql://postgres:5432/pawtel
+      POSTGRES_USER: pawtel
+      POSTGRES_PASSWORD: pawtel
+      JWT_SECRET: superlong-supersecret-at-least-32-chars-123456
+      INTERNAL_TOKEN: topsecret
+      DATA_API_URL: http://data-api:8081
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      data-api:
+        condition: service_started
 
 volumes:
   postgres_data:
